@@ -51,5 +51,5 @@ search_clinvar.m
 	input: variant_summary.txt, final_output_with_predictions.csv
 	output: rows from cancer output data matching to clinvar
 
-	
+The list of all 300k tyrosine predictions from alphafold2 are given here: https://drive.google.com/file/d/1Tb6tZ4-Zc7kxQhbsGuGvEgLBZ_PjhNZ5/view?usp=sharing
 	
