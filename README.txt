@@ -28,28 +28,33 @@ Post-Machine Learning
 
 remove_duplicates.m
 	Removes rows with the same uniprot ID and mutated residue number
-	input: final_output_with_predictions.csv (from machine learning)
-	output: edited final_output_with_predictions.csv
-
-sorte.m
-	Sorts uniprot ids by maximum energy of XGB + direct FoldX phosphorylation. 
-	input: final_output_with_predictions.csv
-	output: uniout.txt
+	input: Dataset_6.csv (from machine learning)
+	output: edited Dataset_6.csv
 
 centralities.m
 	Determines whether network locations with certain centrality measures are prone to harbor destabilizing phosphorylations
-	input: final_output_with_predictions.csv, mmc2.xlsx
+	input: Dataset_6.csv, mmc2.xlsx
  	output: box plots and p values for centralities with low and high ddG
 
 search_humsavar.m
 	Searches the humsavar database for tyrosine to aspartate mutations at the same residue positions as phosphorylations from the cancer dataset
-	input: humsavar2.txt, final_output_with_predictions.csv
+	input: humsavar2.txt, Dataset_6.csv
 	output: rows from cancer output data matching to humsavar
 
 search_clinvar.m
 	Searches the clinvar database for tyrosine to aspartate mutations at the same residue positions as phosphorylations from the cancer dataset
-	input: variant_summary.txt, final_output_with_predictions.csv
+	input: variant_summary.txt, Dataset_6.csv
 	output: rows from cancer output data matching to clinvar
+
+find_cancer_rapid.m 
+	Search for energy of mutation within all alphafold2 mutations, for the cancer ptm dataset
+	input: alpha_pedictions.csv, Dataset_6.csv
+	output: column of energies
+
+psp_search.m
+	Search phophosite plus for energy of mutation within alphafold2 mutations
+	input: alpha_predictions.csv, posit
+	output: energies
 
 The list of all 300k tyrosine predictions from alphafold2 are given here: https://drive.google.com/file/d/1Tb6tZ4-Zc7kxQhbsGuGvEgLBZ_PjhNZ5/view?usp=sharing
 	
