@@ -24,8 +24,8 @@ prepare_pancancer2.m
 catboost_features.py
 	Calculates FoldX and structural features
 	Usage: python catboost_features.py tsu to calculate the features for the Tsuboyama dataset
-	       python catboost_features.py tsu to calculate the features for the cancer dataset
-
+	       python catboost_features.py cancer to calculate the features for the cancer dataset
+		python your_script_name.py single --pdb_file <pdbfile> --mutation <ex. "S123A"> --output_csv <outfile> 
 Machine Learning
 --------------------
 CatBoostRegression.py
