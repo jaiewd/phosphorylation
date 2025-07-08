@@ -344,28 +344,58 @@ def main():
     Main function to orchestrate the analysis pipeline.
     """
     # --- Command-line Argument Parsing ---
-    parser = argparse.ArgumentParser(description="Run protein analysis pipeline on a specified dataset.")
-    parser.add_argument('dataset', choices=DATASET_PATHS.keys(), help='The dataset to process: "cancer" or "tsu".')
+    parser = argparse.ArgumentParser(description="Run protein analysis pipeline.")
+    subparsers = parser.add_subparsers(dest='mode', required=True, help="Operating mode")
+
+    # Create the parser for the "dataset" command
+    parser_dataset = subparsers.add_parser('dataset', help='Process a full dataset from a predefined CSV file.')
+    parser_dataset.add_argument('name', choices=DATASET_PATHS.keys(), 
+                                help=f"The name of the dataset to process: {list(DATASET_PATHS.keys())}")
+
+    # Create the parser for the "single" command
+    parser_single = subparsers.add_parser('single', help='Process a single PDB file.')
+    parser_single.add_argument('--pdb_file', required=True, help='Full path to the input PDB file.')
+    parser_single.add_argument('--mutation', required=True, help="Mutation to analyze, e.g., 'S123A'.")
+    parser_single.add_argument('--output_csv', required=True, help='Path for the output CSV file.')
+
     args = parser.parse_args()
 
-    # --- Set Paths Based on Dataset ---
-    paths = DATASET_PATHS[args.dataset]
-    INPUT_CSV_PATH = paths['input_csv']
-    PDB_PATH = paths['pdb_path']
-    OUTPUT_CSV_PATH = paths['output_csv']
+    # --- Set up DataFrame and paths based on mode ---
+    if args.mode == 'dataset':
+        paths = DATASET_PATHS[args.name]
+        INPUT_CSV_PATH = paths['input_csv']
+        PDB_PATH = paths['pdb_path']
+        OUTPUT_CSV_PATH = paths['output_csv']
+        
+        print(f"--- Running analysis for dataset: {args.name.upper()} ---")
+        print(f"Input CSV: {INPUT_CSV_PATH}")
+        
+        if not os.path.exists(INPUT_CSV_PATH):
+            print(f"FATAL: Input CSV not found at {INPUT_CSV_PATH}")
+            sys.exit(1)
+        df = pd.read_csv(INPUT_CSV_PATH)
+        print(f"Loaded {len(df)} rows from {INPUT_CSV_PATH}")
+
+    elif args.mode == 'single':
+        PDB_FILE_PATH = args.pdb_file
+        PDB_PATH = os.path.dirname(PDB_FILE_PATH)
+        pdb_id = os.path.basename(PDB_FILE_PATH).replace('.pdb', '')
+        mutation = args.mutation
+        OUTPUT_CSV_PATH = args.output_csv
+
+        print("--- Running analysis for single PDB file ---")
+        print(f"PDB file: {PDB_FILE_PATH}")
+        print(f"Mutation: {mutation}")
+
+        if not os.path.exists(PDB_FILE_PATH):
+            print(f"FATAL: PDB file not found at {PDB_FILE_PATH}")
+            sys.exit(1)
+            
+        # Create a DataFrame with a single row for processing
+        df = pd.DataFrame([{'pdb': pdb_id, 'mutation': mutation}])
     
-    print(f"--- Running analysis for dataset: {args.dataset.upper()} ---")
-    print(f"Input CSV: {INPUT_CSV_PATH}")
     print(f"PDB Path: {PDB_PATH}")
     print(f"Output CSV: {OUTPUT_CSV_PATH}")
-
-
-    # --- Load Data ---
-    if not os.path.exists(INPUT_CSV_PATH):
-        print(f"FATAL: Input CSV not found at {INPUT_CSV_PATH}")
-        sys.exit(1)
-    df = pd.read_csv(INPUT_CSV_PATH)
-    print(f"Loaded {len(df)} rows from {INPUT_CSV_PATH}")
 
     # --- Prepare for Results ---
     all_results = []
@@ -444,8 +474,14 @@ def main():
     # --- Combine and Save Results ---
     print("-" * 50)
     print("Combining results with original DataFrame...")
-    results_df = pd.DataFrame(all_results, index=df.index)
-    final_df = pd.concat([df, results_df], axis=1)
+    
+    # For single mode, the original df is just a placeholder. 
+    # For dataset mode, we want to append to the original.
+    if args.mode == 'single':
+        final_df = pd.DataFrame(all_results)
+    else: # dataset mode
+        results_df = pd.DataFrame(all_results, index=df.index)
+        final_df = pd.concat([df, results_df], axis=1)
 
     # Save to new CSV
     final_df.to_csv(OUTPUT_CSV_PATH, index=False)
