@@ -21,10 +21,16 @@ prepare_pancancer2.m
 	input: phostable.csv, aligned sequences
 	output: phoslist_with_conversion.csv
 
+Pre-Machine Learning
+--------------------
 
 
 Post-Machine Learning
 ---------------------
+CatBoostRegression.py
+	Reads the feature file from the external and Tsuiboyama datasets and constructs the cataboost model
+	input: external and tsuiboyama datasets as csv
+	ouutput: Catboost model 
 
 remove_duplicates.m
 	Removes rows with the same uniprot ID and mutated residue number
